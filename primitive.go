@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"runtime"
 	"time"
+	"os"
 
 	"github.com/fogleman/primitive/primitive"
 	"github.com/nfnt/resize"
@@ -51,7 +52,7 @@ func check(err error) {
 	}
 }
 
-func ProcessImage(Input string, InputSize int, OutputSize int, Count int, Mode int, Background string, Alpha int, Repeat int) string{
+func ProcessImage(Input string, InputSize int, OutputSize int, Count int, Mode int, Background string, Alpha int, Repeat int, Output string) {
 /*	Input := fileName
 	InputSize := 256
 	OutputSize := 1024
@@ -91,22 +92,32 @@ func ProcessImage(Input string, InputSize int, OutputSize int, Count int, Mode i
 	// run algorithm
 	model := primitive.NewModel(input, bg, OutputSize, Workers)
 	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
-	start := time.Now()
 	frame := 0
 	primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
 		Count, Mode, Alpha, Repeat)
+
+	outputFile, err := os.OpenFile(Output, os.O_WRONLY, 0666)
+	if err != nil{
+		log.Fatal(err)
+	}
 
 	for i := 0; i < Count; i++ {
 		frame++
 
 		// find optimal shape and add it to the model
-		t := time.Now()
-		n := model.Step(primitive.ShapeType(Mode), Alpha, Repeat)
-		nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
+		//t := time.Now()
+
+		model.Step(primitive.ShapeType(Mode), Alpha, Repeat)
+		outputFile.Seek(0,0)
+		outputFile.WriteString(model.SVG())
+		outputFile.Sync()
+		
+/* 		nps := primitive.NumberString(float64(n) / time.Since(t).Seconds())
 		elapsed := time.Since(start).Seconds()
-		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps)
+		primitive.Log(1, "%d: t=%.3f, score=%.6f, n=%d, n/s=%s\n", frame, elapsed, model.Score, n, nps) */
 
 		// write output image(s)
 	}
-	return model.SVG();
+	//return model.SVG();
+	outputFile.Close()
 }
