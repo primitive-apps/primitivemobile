@@ -91,10 +91,7 @@ func ProcessImage(Input string, InputSize int, OutputSize int, Count int, Mode i
 
 	// run algorithm
 	model := primitive.NewModel(input, bg, OutputSize, Workers)
-	primitive.Log(1, "%d: t=%.3f, score=%.6f\n", 0, 0.0, model.Score)
 	frame := 0
-	primitive.Log(1, "count=%d, mode=%d, alpha=%d, repeat=%d\n",
-		Count, Mode, Alpha, Repeat)
 
 	outputFile, err := os.OpenFile(Output, os.O_WRONLY, 0666)
 	if err != nil{
